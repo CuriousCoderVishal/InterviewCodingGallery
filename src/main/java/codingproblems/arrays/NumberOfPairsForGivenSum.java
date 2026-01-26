@@ -24,7 +24,7 @@ public class NumberOfPairsForGivenSum {
         int ts = 0;
         for (int i = 0; i < a.length; i++) {
             int n2 = X - a[i];
-//Two things checked here : 1. Other pair exist or not and 2. Used or not previously.
+   //Two things checked here : 1. Other pair exist or not and 2. Used or not previously.
             if (frequencyMap.containsKey(n2) && frequencyMap.get(n2) != null) {
                 System.out.println(a[i] + "," + n2);
                 frequencyMap.put(n2, null);

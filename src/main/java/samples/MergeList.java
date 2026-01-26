@@ -14,5 +14,7 @@ public class MergeList {
                 )
                 .collect(Collectors.averagingDouble(Integer::doubleValue)));
 
+        Address address = new Address.Builder().withStreetName("ddfs").build();
+
     }
 }

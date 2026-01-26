@@ -1,17 +1,21 @@
 public class Singleton {
 
-    private static Singleton singleton = null;
+    private static Singleton instance = null;
 
-    private Singleton() {
+    private  Singleton(){
 
     }
 
-    public static Singleton getInstance() {
+    public static Singleton getInstance(){
 
-        if (singleton == null)
-            singleton = new Singleton();
-
-        return singleton;
+       if(instance == null){
+       synchronized (Singleton.class) {
+           if (instance == null) {
+               instance = new Singleton();
+           }
+       }
+       }
+       return instance;
 
     }
 

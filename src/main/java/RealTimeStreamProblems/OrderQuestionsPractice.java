@@ -18,6 +18,7 @@ public class OrderQuestionsPractice {
         prepareData();
         // Exercise 1 — Obtain a list of products belongs to category “Books” with price > 100
         System.out.println("Exercise 1 — Obtain a list of products belongs to category “Books” with price > 100");
+
         products.stream()
                 .filter(product -> product.getCategory().equals("Books") && product.getPrice() > 100)
                 .forEach(System.out::println);
@@ -25,18 +26,45 @@ public class OrderQuestionsPractice {
 
         // Exercise 2 — Obtain a list of order with products belong to category “Baby”
         System.out.println("\n\nExercise 2 — Obtain a list of order with products belong to category “Baby”");
-        orders.stream()
+
+
+       // Here we are using anyMatch() and not filter() because filter returns stream and anymatch returns boolean value
+        //and in parameter of filter("here") we can't use something which doesn't return boolean value.
+
+     /* orders.stream()
+                     // .map(order -> order.getProducts())
+                              .filter(order -> order.getProducts().stream().anyMatch(product -> product.getCategory().equals("Baby")))
+                                      .forEach(System.out::println);
+*/
+      orders.stream()
                 .filter(order -> order.getProducts().stream().anyMatch(product -> product.getCategory().equals("Baby")))
                 .forEach(order -> System.out.println(order));
 
 
         // Exercise 3 — Obtain a list of product with category = “Toys” and then apply 10% discount
         System.out.println("\n\nExercise 3 — Obtain a list of product with category = “Toys” and then apply 10% discount");
+    /*    products.stream()
+                        .filter(product -> product.getCategory().equals("Toys"))
+                                .map(product -> product.setPrice(product.getPrice() * 0.9))
+                // Here, you are using product.setPrice(...). The key point is that the setPrice() method returns void (i.e., it doesn’t return any value).
+                // Therefore, the lambda expression product -> product.setPrice(product.getPrice() * 0.9) is of type Function<Product, Void>.
+                // However, map() expects a function that returns some value (non-void), so the compiler complains that it cannot convert void to a value.
+                                        .forEach(System.out::println);
+*/
+        products.stream()
+                        .filter(product -> product.getCategory().equals("Toys"))
+                                .map(product -> {
+                                    product.setPrice(0.9 * product.getPrice());
+                                    return new Product();
+                                })
+                                        .forEach(System.out::println);
 
+        System.out.println("-----TWO SOLUTIONS--------");
 
         products.stream()
                 .filter(product -> product.getCategory().equals("Toys"))
-                .map(product -> product.withPrice(0 * 9 * product.getPrice()))
+                .map(product -> product.withPrice( 0.9 * product.getPrice())) // withPrice will create new objects of
+                                                                             //  product and won't alter the existing object value
                 .forEach(System.out::println);
 
         //Exercise 4 — Obtain a list of products ordered by customer of tier 2 between 01-Feb-2021 and 01-Apr-2021
@@ -53,26 +81,44 @@ public class OrderQuestionsPractice {
 
         //Exercise 5 — Get the cheapest products of “Books” category
         System.out.println("\n\nExercise 5 — Get the cheapest products of “Books” category");
+
         products.stream()
                 .filter(product -> product.getCategory().equals("Books"))
                 .min(Comparator.comparing(Product::getPrice))
                 .ifPresent(product -> System.out.println(product));
+
         //Exercise 5.1 - Cheapest product in each category
         System.out.println("Exercise 5.1 - Cheapest product in each category");
+
         products.stream()
-                .collect(Collectors.groupingBy(Product::getCategory, Collectors.minBy(Comparator.comparing(Product::getPrice))));
+                .collect(Collectors.groupingBy(Product::getCategory, Collectors.minBy(Comparator.comparing(Product::getPrice))))
+                .forEach((s, product) -> System.out.println(s+":"+product));
+
         //Avg price in each category
         System.out.println("Ex 5.2- Avg price in each category");
         products.stream()
-                .collect(Collectors.groupingBy(Product::getCategory, Collectors.summarizingDouble(Product::getPrice)));
+                        .collect(Collectors.groupingBy(Product::getCategory,Collectors.averagingDouble(Product::getPrice)))
+                                .forEach((s, aDouble) -> System.out.println(s + ": " + aDouble));
 
+
+
+       /* products.stream()
+                .collect(Collectors.groupingBy(Product::getCategory, Collectors.summarizingDouble(Product::getPrice)))
+                .entrySet()
+                .stream()
+                .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+*/
 
         // Exercise 6 — Get the 3 most recent placed order
         System.out.println("\n\nExercise 6 — Get the 3 most recent placed order");
-        orders.stream()
+
+
+       List<Order> orders1 = orders.stream()
                 .sorted(Comparator.comparing(Order::getOrderDate).reversed())
                 .limit(3)
                 .collect(Collectors.toList());
+
+        System.out.println(orders1);
 
         // Exercise 7 — Get a list of orders which were ordered on 15-Mar-2021, log the order records to the console and then return its product list
         System.out.println("\n\nExercise 7 — Get a list of orders which were ordered on 15-Mar-2021, log the order records to the console and then return its product list");
@@ -85,7 +131,10 @@ public class OrderQuestionsPractice {
                 .collect(Collectors.toList());
 
         // Exercise 8 — Calculate total lump sum of all orders placed in Feb 2021
+    //GOOD QUESTION//
         System.out.println("\n\nExercise 8 — Calculate total lump sum of all orders placed in Feb 2021\n");
+
+
         System.out.println(orders.stream()
                 .filter(order -> order.getOrderDate().isAfter(LocalDate.of(2021, 02, 01)))
                 .filter(order -> order.getOrderDate().isBefore(LocalDate.of(2021, 02, 28)))
@@ -96,15 +145,50 @@ public class OrderQuestionsPractice {
 
         // Exercise 9 — Calculate order average payment placed on 14-Mar-2021
         System.out.println("\n\nExercise 9 — Calculate order average payment placed on 14-Mar-2021");
-        orders.stream()
+
+         double value1 = orders.stream()
+                         .filter(order -> order.getOrderDate().equals(LocalDate.of(2021, 03, 14)))
+                                 .flatMap(order -> order.getProducts().stream())
+                                         .collect(Collectors.averagingDouble(Product::getPrice));
+
+
+       double value2 =  orders.stream()
                 .filter(order -> order.getOrderDate().equals(LocalDate.of(2021, 02, 14)))
                 .flatMap(order -> order.products.stream())
                 .mapToDouble(Product::getPrice)
-                .average();
+                .average().orElse(0);
+        System.out.println(value1 +"---"+value2);
 
         // Exercise 11 — Obtain a data map with order id and order’s product count
 
+         /*Difference between groupingBy() and ToMap()
+        🔹 Collectors.toMap()
+        Purpose:
+        Used to collect stream elements into a Map, where each element is mapped to a single key-value pair.
+        - Key Characteristics:
+
+           -One value per key.
+           - One to one mapping
+
+        🔹 Collectors.groupingBy()
+        Purpose:
+       Used to group stream elements by a classifier function, resulting in a Map<K, List> (or other downstream collectors).
+       -Multiple values per key.
+
+*/
         System.out.println("\n\nExercise 11 — Obtain a data map with order id and order’s product count");
+
+        orders.stream()
+                        .collect(Collectors.toMap(Order::getId,order -> order.getProducts().size()));
+
+       /* orders.stream()
+                        .collect(Collectors.groupingBy(Order::getId,Collectors.summingLong(value -> (long) value.getProducts().size())));
+
+*/
+
+
+
+
         orders.stream()
                 .collect(Collectors.toMap(Order::getId,order -> order.getProducts().size()))
                         .forEach((aLong, integer) -> System.out.println(aLong+"----"+integer));
@@ -118,6 +202,8 @@ public class OrderQuestionsPractice {
 
         // Exercise 13 — Produce a data map with order record and product total sum
         System.out.println("\n\nExercise 13 — Produce a data map with order record and product total sum");
+
+
         orders.stream()
                         .collect(Collectors.groupingBy(Function.identity(),Collectors.summarizingDouble(value -> value.getProducts().stream().mapToDouble(Product::getPrice).sum())));
 
@@ -128,22 +214,36 @@ public class OrderQuestionsPractice {
 
 
         System.out.println("\n\nExercise 13.2 — Produce a data map with customers and product total sum");
-
         orders.stream()
-                .collect(Collectors.groupingBy(Order::getCustomer,Collectors.summarizingDouble(value -> value.getProducts().stream().mapToDouble(Product::getPrice).sum())));
+                .collect(Collectors.groupingBy(Order::getCustomer,Collectors.summarizingDouble(value -> value.getProducts().stream().mapToDouble(Product::getPrice).sum())))
+                .forEach((customer, doubleSummaryStatistics) -> System.out.println(customer+":"+doubleSummaryStatistics));
 
-        orders.stream()
+       // Here the code below using Collectors.toMap() will throw error bcoz the map returned can have duplicate keys as Customer is not unique.
+       /* orders.stream()
                 .collect(Collectors.toMap(Order::getCustomer,order -> order.getProducts().stream().mapToDouble(Product::getPrice).sum()));
+*/
+        //✅ Use toMap() when each key is unique, and you just want a simple mapping (e.g., product name to price).
+        //✅ Use groupingBy() when multiple values share the same key, and you need to group them (e.g., products by category).
 
 
         //Exercise 14 — Obtain a data map with list of product name by category ; COLLECTORS.MAPPING usage <-----------------------
         System.out.println("\n\nExercise 14 — Obtain a data map with list of product name by category");
 
+
         products.stream()
                 .collect(Collectors.groupingBy(Product::getCategory,Collectors.mapping(Product::getName,Collectors.toList())));
-
+      /* *//*
+        Collectors.mapping() is used inside Collectors.groupingBy() or Collectors.toMap() when you want to transform values before collecting them.
+                It allows mapping one property from objects while performing grouping or collecting operations.
+                  1️⃣ Basic Example - Extracting Only Names While Grouping
+         *//*       💡 Scenario: We have a list of Product objects. Instead of grouping them as List<Product>, we only want their names in each group.
+*/
         // Exercise 15 — Get the most expensive product by category
         System.out.println("\n\nExercise 15 — Get the most expensive product by category");
+         products.stream()
+                         .collect(Collectors.groupingBy(Product::getCategory,Collectors.maxBy(Comparator.comparing(Product::getPrice))));
+
+
         products.stream()
                 .collect(Collectors.groupingBy(Product::getCategory,Collectors.maxBy(Comparator.comparing(Product::getPrice))));
 

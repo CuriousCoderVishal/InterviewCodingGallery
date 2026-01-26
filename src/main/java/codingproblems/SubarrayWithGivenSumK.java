@@ -32,7 +32,6 @@ public class SubarrayWithGivenSumK {
                 break;
             }
 
-
             sumToIndexMap.put(currSum, i);
 
         }

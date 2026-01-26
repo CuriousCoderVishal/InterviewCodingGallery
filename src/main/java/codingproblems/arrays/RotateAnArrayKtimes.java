@@ -27,8 +27,6 @@ public class RotateAnArrayKtimes {
         //Reverse whole array
         reverse(a,0,a.length-1);
 
-
-
     }
 
     private static void reverse(int[] a, int startIndex, int endIndex) {
