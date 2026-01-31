@@ -4,7 +4,7 @@ import java.util.Stack;
 
 public class BalancedBrackets {
     public static void main(String[] args) {
-        String brackets = "[{}]({}{})";
+        String brackets = "[{}]({}{}})";
 
         if(isBalanced(brackets))
             System.out.println("Brackets are Balanced");
@@ -12,6 +12,7 @@ public class BalancedBrackets {
             System.out.println("Brackets are not Balanced");
 
     }
+    //
     //Whenever we are traversing the string, we need to check if we encounter a closing bracket
     //                                    1. It has an opening counterpart in stack , means stack is not empty
     //                                    2. if there is opening counterpart, The closing counterpart matches the same or not else return false
